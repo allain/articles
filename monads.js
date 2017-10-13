@@ -38,3 +38,24 @@ Box({})
     .map(x => x.test(), () => 10)
     .map(x => x + 1)
     .map(console.log) // 11
+
+const AsyncBox = src => {
+    if (!src) return ErrorBox()
+
+    const resolver = src.then ? src : new Promise(src)
+    return ({
+        map: (f, handler) => AsyncBox(resolver.then(f, handler))
+    })
+}
+
+AsyncBox((resolve, reject) => {
+    setTimeout(() => resolve(100), 10)
+}).map(x => x + 100)
+    .map(console.log)
+
+AsyncBox((resolve, reject) => {
+    reject(new Error('Erroring'))
+}).map(() => console.error('FAIL'), () => 300)
+
+
+
